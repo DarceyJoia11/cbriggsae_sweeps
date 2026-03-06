@@ -1,16 +1,10 @@
 # C. briggsae strain selection and labelling by country
 # Using 20250626_c_briggsae_strain_data.csv, available on CaeNDR
-# - Clean coordinates
-# - Assign countries
-# - Select one strain per isotype
-# - Generate files for PLINK and further analyses
-# --------------------
-
-# Load necessary libraries
-library(sf)             # for spatial data
-library(rnaturalearth)  # for country polygons
-library(dplyr)          # data manipulation
-library(tidyverse)      # includes readr, ggplot2, etc.
+# Load libraries
+library(sf)             
+library(rnaturalearth)  
+library(dplyr)         
+library(tidyverse)      
 
 # 1. Load data
 Cbriggsae <- read_csv(file.choose())

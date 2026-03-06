@@ -1,0 +1,67 @@
+#!/bin/bash
+#SBATCH --job-name=nematode_pca
+#SBATCH --export=ALL
+#SBATCH --mem=8gb
+#SBATCH --time=24:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=D.E.Joia@sms.ed.ac.uk
+#SBATCH --output=/mnt/loki/hartfield/caenorhabditis/scripts/output/%x_%j.out
+#SBATCH --error=/mnt/loki/hartfield/caenorhabditis/scripts/error/%x_%j.err
+
+# -------------------------------------------------------------
+# Nematode PLINK PCA
+# -------------------------------------------------------------
+
+# Stop script if any command fails
+set -e
+
+# Change to working directory
+cd /mnt/loki/hartfield/caenorhabditis/analyses/Darcey/Cbriggsae
+
+VCF_IN="/mnt/loki/hartfield/caenorhabditis/raw/Cbriggsae_hardfiltered2026/WI.20250626.hard-filter.vcf.gz"
+
+# Merge split multi-allelic records into multiallelic lines
+bcftools norm -m + -Oz -o WI.20250626.normalized.vcf.gz $VCF_IN
+bcftools index WI.20250626.normalized.vcf.gz
+
+# Extract biallelic SNPs (exclude SVs)
+bcftools view -m2 -M2 -v snps -Oz \
+  -o WI.biallelic.snps.vcf.gz \
+  WI.20250626.normalized.vcf.gz
+bcftools index WI.biallelic.snps.vcf.gz
+
+# Keep only one strain per isotype (from the bialleic SNP VCF)
+bcftools view -S unique_isotypes_keep_fixed.txt -Oz \
+  -o WI.biallelic.snps.isotypes.vcf.gz \
+  WI.biallelic.snps.vcf.gz
+bcftools index WI.biallelic.snps.isotypes.vcf.gz
+
+# Convert to PLINK format
+plink \
+  --vcf WI.biallelic.snps.isotypes.vcf.gz \
+  --make-bed \
+  --allow-extra-chr \
+  --out cbriggsae_all_snps
+
+# LD pruning
+plink \
+  --bfile cbriggsae_all_snps \
+  --indep-pairwise 50 10 0.9 \
+  --allow-extra-chr \
+  --out cbriggsae_pruned
+
+# Extract pruned SNPs (from the PLINK-formatted all SNPs file)
+plink \
+  --bfile cbriggsae_all_snps \
+  --extract cbriggsae_pruned.prune.in \
+  --geno 0 \
+  --make-bed \
+  --allow-extra-chr \
+  --out cbriggsae_ld_pruned_dataset
+
+# Run PCA
+plink \
+  --bfile cbriggsae_ld_pruned_dataset \
+  --pca \
+  --allow-extra-chr \
+  --out cbriggsae_pca2

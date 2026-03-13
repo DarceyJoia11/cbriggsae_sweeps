@@ -72,8 +72,7 @@ p <- ggplot(pca_df, aes(x = PC1, y = PC2, color = color)) +
     legend.position = "bottom",
     legend.text = element_text(size = 8),
     legend.key.size = unit(0.5, "lines")
-  ) +
-  coord_equal()
+  ) 
 
 # Save plot
 png(

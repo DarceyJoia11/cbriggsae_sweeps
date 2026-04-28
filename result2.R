@@ -4,16 +4,15 @@ library(ggplot2)
 library(RColorBrewer)
 library(scales)
 
-#Paths
 input_dir <- "/mnt/loki/hartfield/caenorhabditis/analyses/Darcey/Cbriggsae"
 output_dir <- "/mnt/loki/hartfield/caenorhabditis/results/Darcey/Cbriggsae"
 
-#Chromsomes
+# Chromsomes
 chroms <- c("I","II","III","IV","V","X")
 chrom_colors <- brewer.pal(6, "Set2")
 names(chrom_colors) <- chroms
 
-#Combine GERMLINE files
+# Combine GERMLINE files
 all_ibd <- rbindlist(lapply(chroms, function(chr) {
 
 file <- file.path(input_dir, paste0("australia_", chr, "_ibd"))

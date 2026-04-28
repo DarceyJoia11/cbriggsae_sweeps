@@ -2,7 +2,6 @@ library(data.table)
 library(ggplot2)
 library(scales)
 
-#Paths
 input_dir <- "/mnt/loki/hartfield/caenorhabditis/analyses/Darcey/Cbriggsae"
 output_dir <- "/mnt/loki/hartfield/caenorhabditis/results/Darcey/Cbriggsae"
 
@@ -42,10 +41,10 @@ pair_stats[, prop_percent := (total_ibd_bp / genome_size) * 100]
 p <- ggplot(pair_stats, aes(x = prop_percent)) +
 
   geom_histogram(
-    bins = 50,              # keep your thin bars
-    boundary = 0,           # ✔ align bins to start at 0
-    fill = "steelblue",     # ✔ restore original colour
-    color = NA              # ✔ no borders
+    bins = 50,             
+    boundary = 0,         
+    fill = "steelblue",     
+    color = NA              
   ) +
 
   scale_x_continuous(

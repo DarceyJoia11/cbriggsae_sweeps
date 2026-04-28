@@ -2,7 +2,6 @@ library(data.table)
 library(ggplot2)
 library(scales)
 
-# PATHS
 input_dir <- "/mnt/loki/hartfield/caenorhabditis/analyses/Darcey/Cbriggsae"
 output_dir <- "/mnt/loki/hartfield/caenorhabditis/results/Darcey/Cbriggsae"
 
@@ -10,7 +9,7 @@ chroms <- c("I","II","III","IV","V","X")
 
 genome_size <- 106181468
 
-# LOAD GERMLINE DATA
+# Data
 all_ibd <- rbindlist(lapply(chroms, function(chr) {
 
   file <- file.path(input_dir, paste0("australia_", chr, "_ibd"))
@@ -29,7 +28,7 @@ all_ibd <- rbindlist(lapply(chroms, function(chr) {
   dt
 }))
 
-# PAIRWISE SUMMARY
+# Pairwise summary
 pair_stats <- all_ibd[, .(
   total_ibd_bp = sum(length_bp),
   n_segments = .N
@@ -37,7 +36,7 @@ pair_stats <- all_ibd[, .(
 
 pair_stats[, prop_percent := (total_ibd_bp / genome_size) * 100]
 
-# BINNING
+#Binning
 
 x_breaks <- seq(0, 100, 10)
 pair_stats[, x_bin := cut(prop_percent,
@@ -53,16 +52,16 @@ pair_stats[, y_bin := cut(n_segments,
                           include.lowest = TRUE,
                           right = FALSE)]
 
-# GRID COUNTS
+# Grid counts
 grid_counts <- pair_stats[, .N, by = .(x_bin, y_bin)]
 
-# convert bins → numeric midpoints 
+# convert bins to numeric midpoints 
 grid_counts[, x := x_breaks[as.numeric(x_bin)] + 5]
 grid_counts[, y := y_breaks[as.numeric(y_bin)] + 5]
 
 grid_counts <- na.omit(grid_counts)
 
-# DISCRETE COLOUR BINS 
+# Colour bins 
 grid_counts[, N_class := cut(
   N,
   breaks = c(0, 5, 10, 20, 30, 40, 50, 60, 70, 80, Inf),
@@ -78,7 +77,7 @@ grid_counts[, N_class := factor(N_class,
                                 levels = legend_levels,
                                 labels = legend_labels)]
 
-# COLOUR SCALE
+# Colour scale
 fill_cols <- c(
   "<5"  = "#dbe9f6",
   "5"   = "#cfe1f2",
@@ -92,7 +91,7 @@ fill_cols <- c(
   "80" = "#0b4f7a"
 )
 
-# PLOT
+# Plot
 
 p <- ggplot(grid_counts, aes(x = x, y = y, fill = N_class)) +
 
@@ -126,7 +125,6 @@ p <- ggplot(grid_counts, aes(x = x, y = y, fill = N_class)) +
     legend.title = element_text(face = "bold")
   )
 
-# SAVE
 
 ggsave(
   file.path(output_dir, "heatmap.pdf"),
